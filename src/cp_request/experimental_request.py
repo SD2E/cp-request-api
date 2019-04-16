@@ -48,7 +48,17 @@ class ExperimentalRequest:
         )
 
     def __repr__(self):
-        return "ExperimentalRequest(cp_name={}, reference_name={}, reference_url={}, version={}, derived_from={}, subjects={}, treatments={}, designs={}, measurements={})".format(
+        return (
+            "ExperimentalRequest(cp_name={}, "
+            "reference_name={}, "
+            "reference_url={}, "
+            "version={}, "
+            "derived_from={}, "
+            "subjects={}, "
+            "treatments={}, "
+            "designs={}, "
+            "measurements={})"
+        ).format(
             repr(self.challenge_problem),
             repr(self.experiment_reference),
             repr(self.experiment_reference_url),
