@@ -31,14 +31,14 @@ def main():
         reference_url='https://docs.google.com/document/d/1oMC5VM3XcFn6zscxLKLUe4U-TXbBsz8H6OQwHal1h4g',
         version=Version(major=1, minor=0, patch=0),
         subjects=[
-                NamedEntity(
-                    name="MG1655_NAND_Circuit",
-                    reference="https://hub.sd2e.org/user/sd2e/design/MG1655_NAND_Circuit/1"
-                ),
             NamedEntity(
-                    name="MG1655_empty_landing_pads",
-                    reference="https://hub.sd2e.org/user/sd2e/design/MG1655_empty_landing_pads/1"
-                    )
+                name="MG1655_NAND_Circuit",
+                reference="https://hub.sd2e.org/user/sd2e/design/MG1655_NAND_Circuit/1"
+            ),
+            NamedEntity(
+                name="MG1655_empty_landing_pads",
+                reference="https://hub.sd2e.org/user/sd2e/design/MG1655_empty_landing_pads/1"
+            )
         ],
         treatments=[
             Treatment.create_from(
