@@ -47,21 +47,21 @@ class SampleDecoder(json.JSONDecoder):
     def __init__(self):
         super().__init__(object_hook=self.convert)
 
-    def convert(self, d):
-        if 'object_type' not in d:
-            return d
-        if d['object_type'] != 'sample':
-            return d
-        if 'subject' not in d:
-            return d
+    def convert(self, dictionary):
+        if 'object_type' not in dictionary:
+            return dictionary
+        if dictionary['object_type'] != 'sample':
+            return dictionary
+        if 'subject' not in dictionary:
+            return dictionary
         treatments = list()
-        if 'treatments' in d:
+        if 'treatments' in dictionary:
             treatments = [
                 BlockDefinitionDecoder().object_hook(treatment)
-                for treatment in d['treatments']
+                for treatment in dictionary['treatments']
             ]
         return Sample(
-            subject=BlockDefinitionDecoder().object_hook(d['subject']),
+            subject=BlockDefinitionDecoder().object_hook(dictionary['subject']),
             treatments=treatments
         )
 
@@ -106,16 +106,18 @@ class ControlDecoder(json.JSONDecoder):
     def __init__(self):
         super().__init__(object_hook=self.convert)
 
-    def convert(self, d):
-        if 'object_type' not in d:
-            return d
-        if d['object_type'] != 'control':
-            return d
-        if 'name' not in d:
-            return d
-        if 'sample' not in d:
-            return d
-        return Control(name=d['name'], sample=SampleDecoder().object_hook(d['sample']))
+    def convert(self, dictionary):
+        if 'object_type' not in dictionary:
+            return dictionary
+        if dictionary['object_type'] != 'control':
+            return dictionary
+        if 'name' not in dictionary:
+            return dictionary
+        if 'sample' not in dictionary:
+            return dictionary
+        return Control(
+            name=dictionary['name'],
+            sample=SampleDecoder().object_hook(dictionary['sample']))
 
 
 class Measurement:
@@ -180,26 +182,26 @@ class MeasurementDecoder(json.JSONDecoder):
     def __init__(self):
         super().__init__(object_hook=self.convert)
 
-    def convert(self, d):
-        if 'object_type' not in d:
-            return d
-        if d['object_type'] != 'measurement':
-            return d
-        if 'type' not in d:
-            return d
-        if 'block' not in d:
-            return d
-        if 'performers' not in d:
-            return d
+    def convert(self, dictionary):
+        if 'object_type' not in dictionary:
+            return dictionary
+        if dictionary['object_type'] != 'measurement':
+            return dictionary
+        if 'type' not in dictionary:
+            return dictionary
+        if 'block' not in dictionary:
+            return dictionary
+        if 'performers' not in dictionary:
+            return dictionary
         controls = list()
-        if 'controls' in d:
+        if 'controls' in dictionary:
             controls = [
                 ControlDecoder().object_hook(control)
-                for control in d['controls']
+                for control in dictionary['controls']
             ]
         return Measurement(
-            type=d['type'],
-            block=BlockDefinitionDecoder().object_hook(d['block']),
+            type=dictionary['type'],
+            block=BlockDefinitionDecoder().object_hook(dictionary['block']),
             controls=controls,
-            performers=d['performers']
+            performers=dictionary['performers']
         )
