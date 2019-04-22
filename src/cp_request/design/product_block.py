@@ -1,8 +1,9 @@
 from cp_request.design.block_definition import BlockDefinition
+from typing import List
 
 
 class ProductBlock(BlockDefinition):
-    def __init__(self, *, block_list):
+    def __init__(self, *, block_list: List[BlockDefinition]):
         self.__block_list = block_list
 
     def __repr__(self):

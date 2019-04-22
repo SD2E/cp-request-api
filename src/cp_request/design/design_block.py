@@ -1,5 +1,8 @@
+from cp_request.design.block_definition import BlockDefinition
+
+
 class DesignBlock:
-    def __init__(self, *, label: str, definition):
+    def __init__(self, *, label: str, definition: BlockDefinition):
         self.__label = label
         self.__definition = definition
 

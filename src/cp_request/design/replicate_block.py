@@ -2,7 +2,7 @@ from cp_request.design.block_definition import BlockDefinition
 
 
 class ReplicateBlock(BlockDefinition):
-    def __init__(self, *, count: int, block):
+    def __init__(self, *, count: int, block: BlockDefinition):
         self.__count = count
         self.__block = block
 
