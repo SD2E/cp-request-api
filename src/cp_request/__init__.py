@@ -1,6 +1,8 @@
+
 from cp_request.unit import Unit, UnitEncoder, UnitDecoder
 from cp_request.version import Version, VersionEncoder, VersionDecoder
 from cp_request.value import Value, ValueEncoder, ValueDecoder
+from cp_request.attribute import Attribute, AttributeEncoder, AttributeDecoder
 
 from cp_request.named_entity import (
     NamedEntity, NamedEntityEncoder, NamedEntityDecoder
