@@ -1,19 +1,30 @@
 import json
+from cp_request import Attribute, AttributeEncoder, AttributeDecoder
+from typing import List
 
 
 class NamedEntity:
-    def __init__(self, *, name, reference):
+    def __init__(self, *, name: str, reference: str,
+                 attributes: List[Attribute] = list()):
         self.__name = name
         self.__reference = reference
+        self.__attributes = list(attributes)
 
     def __repr__(self):
+        if self.__attributes:
+            return "NamedEntity(name={}, reference={}, attributes={})".format(
+                repr(self.__name),
+                repr(self.__reference),
+                repr(self.__attributes))
         return "NamedEntity(name={}, reference={})".format(
             repr(self.__name), repr(self.__reference))
 
     def __eq__(self, other):
         if not isinstance(other, NamedEntity):
             return False
-        return self.__name == other.__name and self.__reference == other.__reference
+        return (self.__name == other.__name
+                and self.__reference == other.__reference
+                and self.__attributes == other.__attributes)
 
     @property
     def name(self):
@@ -22,6 +33,10 @@ class NamedEntity:
     @property
     def reference(self):
         return self.__reference
+
+    @property
+    def attributes(self):
+        return self.__attributes
 
 
 class NamedEntityEncoder(json.JSONEncoder):
@@ -32,6 +47,11 @@ class NamedEntityEncoder(json.JSONEncoder):
             rep['object_type'] = 'named_entity'
             rep['name'] = obj.name
             rep['reference'] = obj.reference
+            if obj.attributes:
+                rep['attributes'] = [
+                    AttributeEncoder().default(attr)
+                    for attr in obj.attributes
+                ]
             return rep
         return super().default(obj)
 
@@ -50,7 +70,13 @@ class NamedEntityDecoder(json.JSONDecoder):
         if 'reference' not in d:
             return d
 
+        attributes = list()
+        if 'attributes' in d:
+            attributes = [AttributeDecoder().convert(attr_obj)
+                          for attr_obj in d['attributes']]
+
         return NamedEntity(
             name=d['name'],
-            reference=d['reference']
+            reference=d['reference'],
+            attributes=attributes
         )

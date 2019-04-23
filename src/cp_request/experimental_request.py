@@ -13,6 +13,10 @@ from typing import List
 
 
 class ExperimentalRequest:
+    """
+    Defines a structured experimental request
+    """
+
     def __init__(self, *, cp_name: str,
                  reference_name: str,
                  reference_url: str,
@@ -126,18 +130,30 @@ class ExperimentDecoder(json.JSONDecoder):
         if 'derived_from' in d:
             derived_from = d['derived_from']
 
+        symbol_table = dict()
+        subjects = [NamedEntityDecoder().object_hook(entity)
+                    for entity in d['subjects']]
+        for subject in subjects:
+            symbol_table[subject.name] = subject
+        treatments = [TreatmentDecoder().object_hook(treatment)
+                      for treatment in d['treatments']]
+        for treatment in treatments:
+            symbol_table[treatment.name] = treatment
+
         return ExperimentalRequest(
             cp_name=d['challenge_problem'],
             reference_name=d['experiment_reference'],
             reference_url=d['experiment_reference_url'],
             version=VersionDecoder().object_hook(d['experiment_version']),
             derived_from=derived_from,
-            subjects=[NamedEntityDecoder().object_hook(entity)
-                      for entity in d['subjects']],
-            treatments=[TreatmentDecoder().object_hook(treatment)
-                        for treatment in d['treatments']],
-            designs=[DesignBlockDecoder().object_hook(design)
-                     for design in d['designs']],
-            measurements=[MeasurementDecoder().object_hook(measurement)
-                          for measurement in d['measurements']]
+            subjects=subjects,
+            treatments=treatments,
+            designs=[
+                DesignBlockDecoder(symbol_table).object_hook(design)
+                for design in d['designs']
+            ],
+            measurements=[
+                MeasurementDecoder(symbol_table).object_hook(measurement)
+                for measurement in d['measurements']
+            ]
         )

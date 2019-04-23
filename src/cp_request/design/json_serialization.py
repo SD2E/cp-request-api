@@ -1,4 +1,5 @@
 import json
+from cp_request import Treatment
 from cp_request.design import (
     BlockReference,
     DesignBlock,
@@ -8,8 +9,6 @@ from cp_request.design import (
     SubjectReference,
     SumBlock,
     TreatmentReference,
-    TreatmentAttributeReference,
-    TreatmentAttributeValueReference,
     TreatmentValueReference,
     TupleBlock
 )
@@ -17,6 +16,7 @@ from cp_request.design.block_definition import BlockDefinition
 from cp_request import (
     ValueEncoder, ValueDecoder
 )
+from typing import Dict
 
 
 class BlockReferenceEncoder(json.JSONEncoder):
@@ -59,7 +59,8 @@ class DesignBlockEncoder(json.JSONEncoder):
 
 
 class DesignBlockDecoder(json.JSONDecoder):
-    def __init__(self):
+    def __init__(self, symbol_table):
+        self.__symbol_table = symbol_table
         super().__init__(object_hook=self.convert)
 
     def convert(self, d):
@@ -73,7 +74,8 @@ class DesignBlockDecoder(json.JSONDecoder):
             return d
         return DesignBlock(
             label=d['label'],
-            definition=BlockDefinitionDecoder().object_hook(d['definition'])
+            definition=BlockDefinitionDecoder(
+                self.__symbol_table).object_hook(d['definition'])
         )
 
 
@@ -83,8 +85,7 @@ class GenerateBlockEncoder(json.JSONEncoder):
         if isinstance(obj, GenerateBlock):
             rep = dict()
             rep['block_type'] = 'generate_block'
-            rep['treatment'] = TreatmentReferenceEncoder().default(
-                obj.treatment)
+            rep['treatment_name'] = obj.treatment.name
             rep['values'] = [
                 ValueEncoder().default(value) for value in obj.values
             ]
@@ -93,7 +94,8 @@ class GenerateBlockEncoder(json.JSONEncoder):
 
 
 class GenerateBlockDecoder(json.JSONDecoder):
-    def __init__(self):
+    def __init__(self, symbol_table):
+        self.__symbol_table = symbol_table
         super().__init__(object_hook=self.convert)
 
     def convert(self, d):
@@ -101,9 +103,13 @@ class GenerateBlockDecoder(json.JSONDecoder):
             return d
         if d['block_type'] != 'generate_block':
             return d
+        if 'treatment_name' not in d:
+            return d
+        if d['treatment_name'] not in self.__symbol_table:
+            return d
+        treatment = self.__symbol_table[d['treatment_name']]
         return GenerateBlock(
-            treatment=TreatmentReferenceDecoder(
-            ).object_hook(d['treatment']),
+            treatment=treatment,
             values=[
                 ValueDecoder().object_hook(value) for value in d['values']
             ])
@@ -124,7 +130,8 @@ class ProductBlockEncoder(json.JSONEncoder):
 
 
 class ProductBlockDecoder(json.JSONDecoder):
-    def __init__(self):
+    def __init__(self, symbol_table):
+        self.__symbol_table = symbol_table
         super().__init__(object_hook=self.convert)
 
     def convert(self, d):
@@ -136,7 +143,7 @@ class ProductBlockDecoder(json.JSONDecoder):
             return d
 
         return ProductBlock(block_list=[
-            BlockDefinitionDecoder().object_hook(block)
+            BlockDefinitionDecoder(self.__symbol_table).object_hook(block)
             for block in d['block_list']
         ])
 
@@ -154,7 +161,8 @@ class ReplicateBlockEncoder(json.JSONEncoder):
 
 
 class ReplicateBlockDecoder(json.JSONDecoder):
-    def __init__(self):
+    def __init__(self, symbol_table):
+        self.__symbol_table = symbol_table
         super().__init__(object_hook=self.convert)
 
     def convert(self, d):
@@ -168,7 +176,8 @@ class ReplicateBlockDecoder(json.JSONDecoder):
             return d
         return ReplicateBlock(
             count=d['count'],
-            block=BlockDefinitionDecoder().object_hook(d['block'])
+            block=BlockDefinitionDecoder(
+                self.__symbol_table).object_hook(d['block'])
         )
 
 
@@ -178,13 +187,14 @@ class SubjectReferenceEncoder(json.JSONEncoder):
         if isinstance(obj, SubjectReference):
             rep = dict()
             rep['block_type'] = 'subject_reference'
-            rep['reference'] = obj.entity_name
+            rep['reference'] = obj.entity.name
             return rep
         return super().default(obj)
 
 
 class SubjectReferenceDecoder(json.JSONDecoder):
-    def __init__(self):
+    def __init__(self, symbol_table):
+        self.__symbol_table = symbol_table
         super().__init__(object_hook=self.convert)
 
     def convert(self, d):
@@ -194,7 +204,9 @@ class SubjectReferenceDecoder(json.JSONDecoder):
             return d
         if 'reference' not in d:
             return d
-        return SubjectReference(entity_name=d['reference'])
+        if d['reference'] not in self.__symbol_table:
+            return d
+        return SubjectReference(entity=self.__symbol_table[d['reference']])
 
 
 class SumBlockEncoder(json.JSONEncoder):
@@ -212,7 +224,8 @@ class SumBlockEncoder(json.JSONEncoder):
 
 
 class SumBlockDecoder(json.JSONDecoder):
-    def __init__(self):
+    def __init__(self, symbol_table):
+        self.__symbol_table = symbol_table
         super().__init__(object_hook=self.convert)
 
     def convert(self, d):
@@ -224,7 +237,7 @@ class SumBlockDecoder(json.JSONDecoder):
             return d
         return SumBlock(
             block_list=[
-                BlockDefinitionDecoder().object_hook(block)
+                BlockDefinitionDecoder(self.__symbol_table).object_hook(block)
                 for block in d['block_list']
             ])
 
@@ -235,14 +248,8 @@ class TreatmentReferenceEncoder(json.JSONEncoder):
         if isinstance(obj, TreatmentReference):
             rep = dict()
             rep['block_type'] = 'treatment_reference'
-            rep['treatment_name'] = obj.treatment_name
-            if isinstance(obj, TreatmentAttributeReference):
-                rep['block_type'] = 'attribute_treatment_reference'
-                rep['attribute'] = obj.attribute
-                if isinstance(obj, TreatmentAttributeValueReference):
-                    rep['block_type'] = 'attribute_value_treatment_reference'
-                    rep['value'] = ValueEncoder().default(obj.value)
-            elif isinstance(obj, TreatmentValueReference):
+            rep['reference'] = obj.treatment_name
+            if isinstance(obj, TreatmentValueReference):
                 rep['block_type'] = 'value_treatment_reference'
                 rep['value'] = ValueEncoder().default(obj.value)
             return rep
@@ -250,7 +257,8 @@ class TreatmentReferenceEncoder(json.JSONEncoder):
 
 
 class TreatmentReferenceDecoder(json.JSONDecoder):
-    def __init__(self):
+    def __init__(self, symbol_table: Dict[str, Treatment]):
+        self.__symbol_table = symbol_table
         super().__init__(object_hook=self.convert)
 
     def convert(self, d):
@@ -258,33 +266,19 @@ class TreatmentReferenceDecoder(json.JSONDecoder):
             return d
         if 'block_type' not in d:
             return d
-        if 'treatment_name' not in d:
+        if 'reference' not in d:
             return d
-        if d['block_type'] == 'attribute_treatment_reference':
-            if 'attribute' not in d:
-                return d
-            return TreatmentAttributeReference(
-                treatment_name=d['treatment_name'],
-                attribute=d['attribute']
-            )
-        if d['block_type'] == 'attribute_value_treatment_reference':
-            if 'attribute' not in d:
-                return d
-            if 'value' not in d:
-                return d
-            return TreatmentAttributeValueReference(
-                treatment_name=d['treatment_name'],
-                attribute=d['attribute'],
-                value=ValueDecoder().object_hook(d['value'])
-            )
+        if d['reference'] not in self.__symbol_table:
+            return d
+        treatment = self.__symbol_table[d['reference']]
         if d['block_type'] == 'value_treatment_reference':
             if 'value' not in d:
                 return d
             return TreatmentValueReference(
-                treatment_name=d['treatment_name'],
+                treatment=treatment,
                 value=ValueDecoder().object_hook(d['value'])
             )
-        return TreatmentReference(treatment_name=d['treatment_name'])
+        return TreatmentReference(treatment=treatment)
 
 
 class TupleBlockEncoder(json.JSONEncoder):
@@ -302,7 +296,8 @@ class TupleBlockEncoder(json.JSONEncoder):
 
 
 class TupleBlockDecoder(json.JSONDecoder):
-    def __init__(self):
+    def __init__(self, symbol_table):
+        self.__symbol_table = symbol_table
         super().__init__(object_hook=self.convert)
 
     def convert(self, d):
@@ -314,7 +309,7 @@ class TupleBlockDecoder(json.JSONDecoder):
             return d
 
         return TupleBlock(block_list=[
-            BlockDefinitionDecoder().object_hook(block)
+            BlockDefinitionDecoder(self.__symbol_table).object_hook(block)
             for block in d['block_list']
         ])
 
@@ -343,7 +338,8 @@ class BlockDefinitionEncoder(json.JSONEncoder):
 
 
 class BlockDefinitionDecoder(json.JSONDecoder):
-    def __init__(self):
+    def __init__(self, symbol_table):
+        self.__symbol_table = symbol_table
         super().__init__(object_hook=self.convert)
 
     def convert(self, d):
@@ -354,19 +350,21 @@ class BlockDefinitionDecoder(json.JSONDecoder):
         if d['block_type'] == 'block_reference':
             return BlockReferenceDecoder().object_hook(d)
         if d['block_type'] == 'generate_block':
-            return GenerateBlockDecoder().object_hook(d)
+            return GenerateBlockDecoder(self.__symbol_table).object_hook(d)
         if d['block_type'] == 'product_block':
-            return ProductBlockDecoder().object_hook(d)
+            return ProductBlockDecoder(self.__symbol_table).object_hook(d)
         if d['block_type'] == 'replicate_block':
-            return ReplicateBlockDecoder().object_hook(d)
+            return ReplicateBlockDecoder(self.__symbol_table).object_hook(d)
         if d['block_type'] == 'subject_reference':
-            return SubjectReferenceDecoder().object_hook(d)
+            return SubjectReferenceDecoder(self.__symbol_table).object_hook(d)
         if d['block_type'] == 'sum_block':
-            return SumBlockDecoder().object_hook(d)
+            return SumBlockDecoder(self.__symbol_table).object_hook(d)
         if d['block_type'] == 'tuple_block':
-            return TupleBlockDecoder().object_hook(d)
+            return TupleBlockDecoder(self.__symbol_table).object_hook(d)
 
-        if 'treatment_name' in d:
-            return TreatmentReferenceDecoder().object_hook(d)
+        if (d['block_type'] == 'treatment_reference'
+                or d['block_type'] == 'value_treatment_reference'):
+            return TreatmentReferenceDecoder(
+                self.__symbol_table).object_hook(d)
 
         return d

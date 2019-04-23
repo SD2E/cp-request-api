@@ -1,13 +1,17 @@
 import json
+from cp_request import NamedEntity, Treatment
 from cp_request.design import (
-    BlockReference, SubjectReference, TreatmentReference,
-    BlockDefinitionEncoder, BlockDefinitionDecoder
+    BlockReference,
+    BlockDefinitionEncoder,
+    BlockDefinitionDecoder
 )
 from typing import List
 
 
 class Sample:
-    def __init__(self, *, subject: SubjectReference, treatments: List[TreatmentReference] = list()):
+    def __init__(self, *,
+                 subject: NamedEntity,
+                 treatments: List[Treatment] = list()):
         self.__subject = subject
         self.__treatments = list(treatments)
 
@@ -18,7 +22,8 @@ class Sample:
     def __eq__(self, other):
         if not isinstance(other, Sample):
             return False
-        return self.subject == other.subject and self.treatments == self.treatments
+        return (self.subject == other.subject
+                and self.treatments == self.treatments)
 
     @property
     def subject(self):
@@ -35,7 +40,7 @@ class SampleEncoder(json.JSONEncoder):
         if isinstance(obj, Sample):
             rep = dict()
             rep['object_type'] = 'sample'
-            rep['subject'] = BlockDefinitionEncoder().default(obj.subject)
+            rep['subject'] = obj.subject.name
             if obj.treatments:
                 rep['treatments'] = [BlockDefinitionEncoder().default(ref)
                                      for ref in obj.treatments]
@@ -44,7 +49,8 @@ class SampleEncoder(json.JSONEncoder):
 
 
 class SampleDecoder(json.JSONDecoder):
-    def __init__(self):
+    def __init__(self, symbol_table):
+        self.__symbol_table = symbol_table
         super().__init__(object_hook=self.convert)
 
     def convert(self, dictionary):
@@ -54,14 +60,16 @@ class SampleDecoder(json.JSONDecoder):
             return dictionary
         if 'subject' not in dictionary:
             return dictionary
+        subject = self.__symbol_table[dictionary['subject']]
         treatments = list()
         if 'treatments' in dictionary:
             treatments = [
-                BlockDefinitionDecoder().object_hook(treatment)
+                BlockDefinitionDecoder(
+                    self.__symbol_table).object_hook(treatment)
                 for treatment in dictionary['treatments']
             ]
         return Sample(
-            subject=BlockDefinitionDecoder().object_hook(dictionary['subject']),
+            subject=subject,
             treatments=treatments
         )
 
@@ -103,7 +111,8 @@ class ControlEncoder(json.JSONEncoder):
 
 
 class ControlDecoder(json.JSONDecoder):
-    def __init__(self):
+    def __init__(self, symbol_table):
+        self.__symbol_table = symbol_table
         super().__init__(object_hook=self.convert)
 
     def convert(self, dictionary):
@@ -117,7 +126,7 @@ class ControlDecoder(json.JSONDecoder):
             return dictionary
         return Control(
             name=dictionary['name'],
-            sample=SampleDecoder().object_hook(dictionary['sample']))
+            sample=SampleDecoder(self.__symbol_table).object_hook(dictionary['sample']))
 
 
 class Measurement:
@@ -179,7 +188,8 @@ class MeasurementEncoder(json.JSONEncoder):
 
 
 class MeasurementDecoder(json.JSONDecoder):
-    def __init__(self):
+    def __init__(self, symbol_table):
+        self.__symbol_table = symbol_table
         super().__init__(object_hook=self.convert)
 
     def convert(self, dictionary):
@@ -196,12 +206,12 @@ class MeasurementDecoder(json.JSONDecoder):
         controls = list()
         if 'controls' in dictionary:
             controls = [
-                ControlDecoder().object_hook(control)
+                ControlDecoder(self.__symbol_table).object_hook(control)
                 for control in dictionary['controls']
             ]
         return Measurement(
             type=dictionary['type'],
-            block=BlockDefinitionDecoder().object_hook(dictionary['block']),
+            block=BlockDefinitionDecoder(self.__symbol_table).object_hook(dictionary['block']),
             controls=controls,
             performers=dictionary['performers']
         )

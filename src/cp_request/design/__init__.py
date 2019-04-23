@@ -2,8 +2,6 @@ from cp_request.design.block_reference import BlockReference
 from cp_request.design.subject_reference import SubjectReference
 from cp_request.design.treatment_reference import (
     TreatmentReference,
-    TreatmentAttributeReference, 
-    TreatmentAttributeValueReference, 
     TreatmentValueReference
 )
 

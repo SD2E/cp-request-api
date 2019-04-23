@@ -4,7 +4,7 @@ from typing import Union
 
 
 class Value:
-    def __init__(self, *, value: Union[str, int], unit: Unit):
+    def __init__(self, *, value: Union[int, float], unit: Unit):
         self.__value = value
         self.__unit = unit
 
@@ -25,7 +25,7 @@ class Value:
     def unit(self):
         return self.__unit
 
-    
+
 class ValueEncoder(json.JSONEncoder):
     def default(self, obj):
         # pylint: disable=E0202
