@@ -17,6 +17,9 @@ class Value:
             return False
         return self.value == other.value and self.unit == other.unit
 
+    def apply(self, visitor):
+        visitor.visit_value(self)
+
     @property
     def value(self):
         return self.__value

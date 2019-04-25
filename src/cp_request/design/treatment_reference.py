@@ -29,6 +29,9 @@ class TreatmentReference(BlockDefinition):
             return False
         return self.__treatment == other.__treatment
 
+    def apply(self, visitor):
+        visitor.visit_treatment_reference(self)
+
     @property
     def treatment(self):
         return self.__treatment
@@ -54,7 +57,9 @@ class TreatmentValueReference(TreatmentReference):
             return False
         return self.value == other.value
 
+    def apply(self, visitor):
+        visitor.visit_treatment_value_reference(self)
+
     @property
     def value(self):
         return self.__value
-

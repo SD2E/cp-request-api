@@ -17,6 +17,9 @@ class Unit:
 
         return self.__reference == other.__reference
 
+    def apply(self, visitor):
+        visitor.visit_unit(self)
+
     @property
     def reference(self):
         return self.__reference

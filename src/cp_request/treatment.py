@@ -22,6 +22,9 @@ class Treatment(abc.ABC):
         raise CannotCreateTreatmentException(
             'No valid combinations of arguments provided')
 
+    def apply(self, visitor):
+        visitor.visit_treatment(self)
+
     def is_bound(self):
         return False
 

@@ -22,6 +22,9 @@ class Version:
                 self.__minor == other.minor and
                 self.__patch == other.patch)
 
+    def apply(self, visitor):
+        visitor.visit_version(self)
+
     @property
     def major(self):
         return self.__major

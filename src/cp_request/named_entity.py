@@ -26,6 +26,9 @@ class NamedEntity:
                 and self.__reference == other.__reference
                 and self.__attributes == other.__attributes)
 
+    def apply(self, visitor):
+        visitor.visit_named_entity(self)
+
     @property
     def name(self):
         return self.__name

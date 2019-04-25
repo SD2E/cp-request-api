@@ -74,6 +74,9 @@ class ExperimentalRequest:
             repr(self.measurements)
         )
 
+    def apply(self, visitor):
+        visitor.visit_experiment(self)
+
 
 class ExperimentEncoder(json.JSONEncoder):
     def default(self, obj):

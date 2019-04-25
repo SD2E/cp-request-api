@@ -17,6 +17,9 @@ class ProductBlock(BlockDefinition):
             return False
         return self.__block_list == other.__block_list
 
+    def apply(self, visitor):
+        visitor.visit_product_block(self)
+
     @property
     def block_list(self):
         return self.__block_list

@@ -16,6 +16,9 @@ class BlockReference(BlockDefinition):
             return False
         return self.__block_label == other.__block_label
 
+    def apply(self, visitor):
+        visitor.visit_block_reference(self)
+
     @property
     def block_label(self):
         return self.__block_label

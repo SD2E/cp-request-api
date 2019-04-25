@@ -22,6 +22,9 @@ class GenerateBlock(BlockDefinition):
         return (self.__treatment == other.__treatment and
                 self.__values == other.__values)
 
+        def apply(self, visitor):
+            visitor.visit_generate_block(self)
+
     @property
     def treatment(self):
         return self.__treatment

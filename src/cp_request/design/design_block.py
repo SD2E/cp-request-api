@@ -19,6 +19,9 @@ class DesignBlock:
         return (self.__label == other.__label and
                 self.__definition == self.__definition)
 
+    def apply(self, visitor):
+        visitor.visit_design_block(self)
+
     @property
     def label(self):
         return self.__label

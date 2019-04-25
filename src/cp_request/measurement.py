@@ -25,6 +25,9 @@ class Sample:
         return (self.subject == other.subject
                 and self.treatments == self.treatments)
 
+    def apply(self, visitor):
+        visitor.visit_sample(self)
+
     @property
     def subject(self):
         return self.__subject
@@ -89,6 +92,9 @@ class Control:
             return False
         return self.name == other.name and self.sample == other.sample
 
+    def apply(self, visitor):
+        visitor.visit_control(self)
+
     @property
     def name(self):
         return self.__name
@@ -152,6 +158,9 @@ class Measurement:
         return "Measurement(type={}, block={}, controls={}, performers={})".format(
             repr(self.type), repr(self.block), repr(self.controls), repr(self.performers))
 
+    def apply(self, visitor):
+        visitor.visit_measurement(self)
+
     @property
     def type(self):
         return self.__type
@@ -211,7 +220,8 @@ class MeasurementDecoder(json.JSONDecoder):
             ]
         return Measurement(
             type=dictionary['type'],
-            block=BlockDefinitionDecoder(self.__symbol_table).object_hook(dictionary['block']),
+            block=BlockDefinitionDecoder(
+                self.__symbol_table).object_hook(dictionary['block']),
             controls=controls,
             performers=dictionary['performers']
         )

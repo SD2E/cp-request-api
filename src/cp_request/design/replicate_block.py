@@ -18,6 +18,9 @@ class ReplicateBlock(BlockDefinition):
             return False
         return self.count == other.count and self.block == other.block
 
+    def apply(self, visitor):
+        visitor.visit_replicate_block(self)
+
     @property
     def count(self):
         return self.__count

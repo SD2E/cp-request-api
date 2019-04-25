@@ -29,6 +29,9 @@ class Attribute:
             return False
         return self.name == other.name
 
+    def apply(self, visitor):
+        visitor.visit_attribute(self)
+
     @property
     def name(self):
         return self.__name

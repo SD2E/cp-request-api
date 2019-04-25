@@ -17,6 +17,9 @@ class SubjectReference(BlockDefinition):
             return False
         return self.__entity == other.__entity
 
+    def apply(self, visitor):
+        visitor.visit_subject_reference(self)
+
     @property
     def entity(self):
         return self.__entity
