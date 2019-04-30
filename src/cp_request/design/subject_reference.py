@@ -3,6 +3,10 @@ from cp_request.design.block_definition import BlockDefinition
 
 
 class SubjectReference(BlockDefinition):
+    """
+    Represents a design block defined as a single entity.
+    """
+
     def __init__(self, *, entity: NamedEntity):
         self.__entity = entity
 

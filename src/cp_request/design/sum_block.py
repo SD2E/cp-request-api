@@ -3,12 +3,18 @@ from typing import List
 
 
 class SumBlock(BlockDefinition):
+    """
+    Represents a design block definition that is the sum of a sequence of
+    blocks.
+    """
+
     def __init__(self, *, block_list: List[BlockDefinition]):
         self.__block_list = block_list
 
     def __repr__(self):
         return "SumBlock(block_list={})".format(repr(self.__block_list))
 
+    # TODO: defined str method
     def __str__(self):
         pass
 

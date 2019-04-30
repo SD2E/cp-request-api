@@ -2,6 +2,13 @@ from cp_request.design.block_definition import BlockDefinition
 
 
 class DesignBlock:
+    """
+    Represents a labeled {BlockDefinition}.
+
+    Allows the definition of an experimental design that can be composed
+    with other definitions to form a large design.
+    """
+
     def __init__(self, *, label: str, definition: BlockDefinition):
         self.__label = label
         self.__definition = definition

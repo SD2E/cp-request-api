@@ -2,6 +2,11 @@ from cp_request.design.block_definition import BlockDefinition
 
 
 class ReplicateBlock(BlockDefinition):
+    """
+    Represents a design block definition consisting of a sum of a given number
+    of replicates of a block.
+    """
+
     def __init__(self, *, count: int, block: BlockDefinition):
         self.__count = count
         self.__block = block
@@ -10,6 +15,7 @@ class ReplicateBlock(BlockDefinition):
         return "ReplicateBlock(count={}, block={})".format(
             self.__count, repr(self.__block))
 
+    # TODO: implement str method
     def __str__(self):
         pass
 

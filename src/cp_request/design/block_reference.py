@@ -2,6 +2,10 @@ from cp_request.design.block_definition import BlockDefinition
 
 
 class BlockReference(BlockDefinition):
+    """
+    A {BlockDefinition} that is a reference to a design block.
+    """
+
     def __init__(self, *, label: str):
         self.__block_label = label
 

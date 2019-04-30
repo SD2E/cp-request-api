@@ -3,12 +3,18 @@ from typing import List
 
 
 class ProductBlock(BlockDefinition):
+    """
+    Represents a design block formed by taking the product of a sequence of
+    blocks.
+    """
+
     def __init__(self, *, block_list: List[BlockDefinition]):
         self.__block_list = block_list
 
     def __repr__(self):
         return "ProductBlock(block_list={})".format(repr(self.__block_list))
 
+    # TODO: define str method
     def __str__(self):
         pass
 

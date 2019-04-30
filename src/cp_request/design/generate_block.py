@@ -5,6 +5,13 @@ from typing import List
 
 
 class GenerateBlock(BlockDefinition):
+    """
+    A design block definition by assigning a list of values to a treatment.
+
+    Equivalent to a {SumBlock} that includes each assignment of values to the
+    attribute(s) of the treatment.
+    """
+
     def __init__(self, *, treatment: TreatmentReference, values: List[Value]):
         self.__treatment = treatment
         self.__values = values
@@ -13,6 +20,7 @@ class GenerateBlock(BlockDefinition):
         return "GenerateBlock(treatment={}, values={})".format(
             repr(self.__treatment), repr(self.__values))
 
+    # TODO: implement str method
     def __str__(self):
         pass
 
