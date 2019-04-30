@@ -1,3 +1,7 @@
+"""
+Package for classes representing treatments.
+"""
+
 import abc
 import json
 from cp_request import (
@@ -7,6 +11,10 @@ from cp_request import (
 
 
 class Treatment(abc.ABC):
+    """
+    Abstract base class for treatments.
+    """
+
     @abc.abstractmethod
     def __init__(self, *, name: str):
         self.__name = name
@@ -15,6 +23,11 @@ class Treatment(abc.ABC):
     def create_from(*,
                     attribute: Attribute = None,
                     entity: NamedEntity = None):
+        """
+        Creates a Treatment object based on the parameters.
+        If an attribute is provided, creates an {AttributeTreatment}.
+        Or, if an entity is provided, creates an {EntityTreatment}.
+        """
         if attribute:
             return AttributeTreatment(attribute=attribute)
         elif entity:
@@ -26,6 +39,10 @@ class Treatment(abc.ABC):
         visitor.visit_treatment(self)
 
     def is_bound(self):
+        """
+        Indicates that all {Attribute} instances of this {Treatment}
+        are bound to a {Value}.
+        """
         return False
 
     @property
@@ -39,6 +56,10 @@ class CannotCreateTreatmentException(Exception):
 
 
 class TreatmentEncoder(json.JSONEncoder):
+    """
+    A JSONEncoder to serialize an instance of {Treatment}.
+    """
+
     def default(self, obj):
         # pylint: disable=E0202
         if isinstance(obj, AttributeTreatment):
@@ -49,6 +70,10 @@ class TreatmentEncoder(json.JSONEncoder):
 
 
 class TreatmentDecoder(json.JSONDecoder):
+    """
+    A JSONDecoder to deserialize an instance of {Treatment}.
+    """
+
     def __init__(self):
         super().__init__(object_hook=self.convert)
 
@@ -63,6 +88,12 @@ class TreatmentDecoder(json.JSONDecoder):
 
 
 class AttributeTreatment(Treatment):
+    """
+    Represents an {Treatment} object defined by an {Attribute}.
+
+    Examples are temperature, or time points.
+    """
+
     def __init__(self, *, attribute: Attribute):
         super().__init__(name=attribute.name)
         self.__attribute = attribute
@@ -80,8 +111,14 @@ class AttributeTreatment(Treatment):
     def attribute(self):
         return self.__attribute
 
+    def is_bound(self):
+        return self.__attribute.is_bound()
+
 
 class AttributeTreatmentEncoder(json.JSONEncoder):
+    """
+    A JSONEncoder for the {AttributeTreatment} class.
+    """
     def default(self, obj):
         # pylint: disable=E0202
         if isinstance(obj, AttributeTreatment):
@@ -93,6 +130,12 @@ class AttributeTreatmentEncoder(json.JSONEncoder):
 
 
 class AttributeTreatmentDecoder(json.JSONDecoder):
+    """
+    A JSONDecoder for the {AttributeTreatment} class.
+
+    Note: the convert method is the object_hook.
+    """
+
     def __init__(self):
         super().__init__(object_hook=self.convert)
 
@@ -111,6 +154,10 @@ class AttributeTreatmentDecoder(json.JSONDecoder):
 
 
 class EntityTreatment(Treatment):
+    """
+    Defines a {Treatment} that is defined by a {NamedEntity}.
+    """
+
     def __init__(self, *, entity: NamedEntity):
         super().__init__(name=entity.name)
         self.__entity = entity
@@ -129,10 +176,14 @@ class EntityTreatment(Treatment):
         return self.__entity
 
     def is_bound(self):
-        return True
+        return self.entity.is_bound()
 
 
 class EntityTreatmentEncoder(json.JSONEncoder):
+    """
+    A JSONEncoder for the {EntityTreatment} class.
+    """
+
     def default(self, obj):
         # pylint: disable=E0202
         if isinstance(obj, EntityTreatment):
@@ -144,6 +195,12 @@ class EntityTreatmentEncoder(json.JSONEncoder):
 
 
 class EntityTreatmentDecoder(json.JSONDecoder):
+    """
+    A JSONDecoder for the {EntityTreatment} class.
+
+    Note: the convert method is the object_hook.
+    """
+
     def __init__(self):
         super().__init__(object_hook=self.convert)
 

@@ -2,6 +2,13 @@ import json
 
 
 class Version:
+    """
+    Represents a semantic version (with major, minor and patch numbers).
+
+    JSON serialization can be done with {VersionEncoder}, and deserialization
+    with {VersionDecoder}.
+    """
+
     def __init__(self, *, major: int, minor: int, patch: int):
         self.__major = int(major)
         self.__minor = int(minor)
@@ -39,6 +46,10 @@ class Version:
 
 
 class VersionEncoder(json.JSONEncoder):
+    """
+    A JSONEncoder for the {Version} class.
+    """
+
     def default(self, obj):
         # pylint: disable=E0202
         if isinstance(obj, Version):
@@ -51,6 +62,12 @@ class VersionEncoder(json.JSONEncoder):
 
 
 class VersionDecoder(json.JSONDecoder):
+    """
+    A JSONDecoder for the {Version} class.
+
+    Note: the convert method is the object_hook.
+    """
+
     def __init__(self):
         super().__init__(object_hook=self.convert)
 

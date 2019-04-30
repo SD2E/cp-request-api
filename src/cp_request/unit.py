@@ -2,6 +2,13 @@ import json
 
 
 class Unit:
+    """
+    Represents a unit of measurement with a URI reference.
+
+    JSON serialization can be done with {UnitEncoder}, and deserialization
+    with {UnitDecoder}.
+    """
+
     def __init__(self, *, reference):
         self.__reference = reference
 
@@ -26,6 +33,10 @@ class Unit:
 
 
 class UnitEncoder(json.JSONEncoder):
+    """
+    A JSONEncoder for the {Unit} class.
+    """
+
     def default(self, obj):
         # pylint: disable=E0202
         if isinstance(obj, Unit):
@@ -37,6 +48,12 @@ class UnitEncoder(json.JSONEncoder):
 
 
 class UnitDecoder(json.JSONDecoder):
+    """
+    A JSONDecoder for the {Unit} class.
+
+    Note: the convert method is the object_hook.
+    """
+
     def __init__(self):
         super().__init__(object_hook=self.convert)
 

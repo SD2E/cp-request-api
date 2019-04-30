@@ -8,7 +8,12 @@ from cp_request.design import (
 from typing import List
 
 
+# TODO: ensure that entity and treatments are bound
 class Sample:
+    """
+    An entity with treatments.
+    """
+
     def __init__(self, *,
                  subject: NamedEntity,
                  treatments: List[Treatment] = list()):
@@ -78,6 +83,10 @@ class SampleDecoder(json.JSONDecoder):
 
 
 class Control:
+    """
+    A {Sample} that represents a measurement control.
+    """
+
     def __init__(self, *, name: str, sample: Sample):
         self.__name = name
         self.__sample = sample
@@ -132,7 +141,8 @@ class ControlDecoder(json.JSONDecoder):
             return dictionary
         return Control(
             name=dictionary['name'],
-            sample=SampleDecoder(self.__symbol_table).object_hook(dictionary['sample']))
+            sample=SampleDecoder(
+                self.__symbol_table).object_hook(dictionary['sample']))
 
 
 class Measurement:
@@ -156,7 +166,10 @@ class Measurement:
 
     def __repr__(self):
         return "Measurement(type={}, block={}, controls={}, performers={})".format(
-            repr(self.type), repr(self.block), repr(self.controls), repr(self.performers))
+            repr(self.type),
+            repr(self.block),
+            repr(self.controls),
+            repr(self.performers))
 
     def apply(self, visitor):
         visitor.visit_measurement(self)

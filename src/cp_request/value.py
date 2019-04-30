@@ -4,6 +4,13 @@ from typing import Union
 
 
 class Value:
+    """
+    Represents a numeric value with a unit.
+
+    JSON serialization provided by {ValueEncoder}, and deserialization by
+    {ValueDecoder}.
+    """
+
     def __init__(self, *, value: Union[int, float], unit: Unit):
         self.__value = value
         self.__unit = unit
@@ -30,6 +37,10 @@ class Value:
 
 
 class ValueEncoder(json.JSONEncoder):
+    """
+    A JSONEncoder for the {Value} class.
+    """
+
     def default(self, obj):
         # pylint: disable=E0202
         if isinstance(obj, Value):
@@ -42,6 +53,12 @@ class ValueEncoder(json.JSONEncoder):
 
 
 class ValueDecoder(json.JSONDecoder):
+    """
+    A JSONDecoder for the {Value} class.
+
+    Note: the convert method is the object_hook.
+    """
+
     def __init__(self):
         super().__init__(object_hook=self.convert)
 

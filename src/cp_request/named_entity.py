@@ -4,6 +4,11 @@ from typing import List
 
 
 class NamedEntity:
+    """
+    Represents an entity in an experiment that has a name,
+    a definition reference, and possibly a set of attributes.
+    """
+
     def __init__(self, *, name: str, reference: str,
                  attributes: List[Attribute] = list()):
         self.__name = name
@@ -40,6 +45,15 @@ class NamedEntity:
     @property
     def attributes(self):
         return self.__attributes
+
+    def is_bound(self):
+        """
+        An entity is bound if no attached attribute is not bound.
+        """
+        for attribute in self.attributes:
+            if not attribute.is_bound():
+                return False
+        return True
 
 
 class NamedEntityEncoder(json.JSONEncoder):

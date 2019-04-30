@@ -7,6 +7,10 @@ from cp_request import (
 
 
 class Attribute:
+    """
+    Abstract base class representing an attribute.
+    """
+
     @abc.abstractmethod
     def __init__(self, name: str):
         self.__name = name
@@ -37,6 +41,9 @@ class Attribute:
         return self.__name
 
     def is_bound(self):
+        """
+        Indicates whether this {Attribute} is bound to a {Value}.
+        """
         return False
 
 
@@ -65,6 +72,9 @@ class BoundAttribute(Attribute):
     @property
     def value(self):
         return self.__value
+
+    def is_bound(self):
+        return True
 
 
 class UnboundAttribute(Attribute):

@@ -27,6 +27,14 @@ from cp_request.design import (
 
 
 class RequestVisitor(abc.ABC):
+    """
+    Abstract visitor for structured request classes.
+    Includes stubbed visit methods for each class, with each simply returning.
+
+    To create a visitor, inherit from this class, define an initializer, and
+    each appropriate visit method.
+    """
+
     @abc.abstractmethod
     def __init__(self):
         pass
