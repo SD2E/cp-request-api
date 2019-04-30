@@ -1,5 +1,4 @@
 import json
-import pytest
 
 from cp_request import (
     Attribute, AttributeEncoder, AttributeDecoder,

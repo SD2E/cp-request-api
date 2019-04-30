@@ -1,5 +1,4 @@
 import json
-import pytest
 
 from cp_request import Attribute, NamedEntity, Unit, Value
 from cp_request.named_entity import NamedEntityEncoder, NamedEntityDecoder
