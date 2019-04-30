@@ -11,8 +11,6 @@ from cp_request.treatment import (
     Treatment, TreatmentEncoder, TreatmentDecoder
 )
 
-from cp_request.program_context import ProgramContext
-
 from cp_request.measurement import (
     Sample, SampleEncoder, SampleDecoder,
     Control, ControlEncoder, ControlDecoder,
