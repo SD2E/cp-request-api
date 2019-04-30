@@ -19,6 +19,8 @@ class TestAttribute:
                     reference='http://purl.obolibrary.org/obo/UO_0000027')
             )
         )
+        assert a1.is_bound()
+
         a2 = Attribute.create_from(
             name='temperature',
             value=Value(
@@ -50,6 +52,8 @@ class TestAttribute:
     def test_unbound_attribute(self):
         t1 = Attribute.create_from(
             name='timepoint', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000027'))
+        assert not t1.is_bound()
+
         t2 = Attribute.create_from(
             name='timepoint', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000027'))
         assert t1 == t1
