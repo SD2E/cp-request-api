@@ -1,9 +1,14 @@
 import json
-from cp_request import NamedEntity, Treatment
-from cp_request.design import (
-    BlockReference,
-    BlockDefinitionEncoder,
-    BlockDefinitionDecoder
+from cp_request import NamedEntity
+from cp_request.design.block_reference import (
+    BlockReference
+)
+from cp_request.design.treatment_reference import (
+    TreatmentReference
+)
+from cp_request.design.json_serialization import (
+    BlockReferenceDecoder, BlockReferenceEncoder,
+    TreatmentReferenceDecoder, TreatmentReferenceEncoder
 )
 from typing import List
 
@@ -16,7 +21,7 @@ class Sample:
 
     def __init__(self, *,
                  subject: NamedEntity,
-                 treatments: List[Treatment] = list()):
+                 treatments: List[TreatmentReference] = list()):
         self.__subject = subject
         self.__treatments = list(treatments)
 
@@ -50,7 +55,7 @@ class SampleEncoder(json.JSONEncoder):
             rep['object_type'] = 'sample'
             rep['subject'] = obj.subject.name
             if obj.treatments:
-                rep['treatments'] = [BlockDefinitionEncoder().default(ref)
+                rep['treatments'] = [TreatmentReferenceEncoder().default(ref)
                                      for ref in obj.treatments]
             return rep
         return super().default(obj)
@@ -72,7 +77,7 @@ class SampleDecoder(json.JSONDecoder):
         treatments = list()
         if 'treatments' in dictionary:
             treatments = [
-                BlockDefinitionDecoder(
+                TreatmentReferenceDecoder(
                     self.__symbol_table).object_hook(treatment)
                 for treatment in dictionary['treatments']
             ]
@@ -198,7 +203,7 @@ class MeasurementEncoder(json.JSONEncoder):
             rep = dict()
             rep['object_type'] = 'measurement'
             rep['type'] = obj.type
-            rep['block'] = BlockDefinitionEncoder().default(obj.block)
+            rep['block'] = BlockReferenceEncoder().default(obj.block)
             if obj.controls:
                 rep['controls'] = [
                     ControlEncoder().default(control)
@@ -233,7 +238,7 @@ class MeasurementDecoder(json.JSONDecoder):
             ]
         return Measurement(
             type=dictionary['type'],
-            block=BlockDefinitionDecoder(
+            block=BlockReferenceDecoder(
                 self.__symbol_table).object_hook(dictionary['block']),
             controls=controls,
             performers=dictionary['performers']
