@@ -7,7 +7,7 @@ from cp_request import (
 )
 from cp_request.design import (
     GenerateBlock, ProductBlock, ReplicateBlock, SumBlock, TupleBlock,
-    BlockReference, TreatmentReference,
+    BlockReference, SubjectReference, TreatmentReference,
     BlockDefinitionEncoder, BlockDefinitionDecoder,
     DesignBlock, DesignBlockEncoder, DesignBlockDecoder
 )
@@ -66,6 +66,97 @@ def timepoint():
     )
 
 
+@pytest.fixture
+def nand_circuit():
+    return NamedEntity(
+        name="MG1655_NAND_Circuit",
+        reference="https://hub.sd2e.org/user/sd2e/design/MG1655_NAND_Circuit/1"
+    )
+
+
+@pytest.fixture
+def empty_landing_pads():
+    return NamedEntity(
+        name="MG1655_empty_landing_pads",
+        reference="https://hub.sd2e.org/user/sd2e/design/MG1655_empty_landing_pads/1"
+    )
+
+
+@pytest.fixture
+def strain_block(nand_circuit, empty_landing_pads, kan):
+    return DesignBlock(
+        label='strains',
+        definition=SumBlock(block_list=[
+            TupleBlock(block_list=[
+                SubjectReference(entity=nand_circuit),
+                TreatmentReference(treatment=kan)
+            ]),
+            SubjectReference(entity=empty_landing_pads)
+        ])
+    )
+
+
+@pytest.fixture
+def condition_block(iptg):
+    micromolar_unit = Unit(
+        reference='http://purl.obolibrary.org/obo/UO_0000064')
+    l_arabinose = Treatment.create_from(
+        entity=NamedEntity(
+            name='L-arabinose',
+            reference='https://hub.sd2e.org/user/sd2e/design/Larabinose/1',
+            attributes=[
+                Attribute.create_from(
+                    name='concentration', unit=micromolar_unit)
+            ])
+    )
+    return DesignBlock(
+        label='conditions',
+        definition=ProductBlock(block_list=[
+            GenerateBlock(
+                treatment=iptg,
+                values=[
+                    Value(
+                                value=0,
+                                unit=micromolar_unit),
+                    Value(
+                        value=0.25,
+                        unit=micromolar_unit),
+                    Value(
+                        value=2.5,
+                        unit=micromolar_unit),
+                    Value(
+                        value=25,
+                        unit=micromolar_unit),
+                    Value(
+                        value=250,
+                        unit=micromolar_unit)
+                ]),
+            GenerateBlock(
+                treatment=l_arabinose,
+                values=[
+                    Value(
+                        value=0,
+                        unit=micromolar_unit),
+                    Value(
+                        value=5,
+                        unit=micromolar_unit),
+                    Value(
+                        value=50,
+                        unit=micromolar_unit),
+                    Value(
+                        value=500,
+                        unit=micromolar_unit),
+                    Value(
+                        value=5000,
+                        unit=micromolar_unit),
+                    Value(
+                        value=25000,
+                        unit=micromolar_unit)
+                ]),
+        ])
+    )
+
+
 class DummyDefinitionDecoder(json.JSONDecoder):
     def __init__(self):
         self.__symbol_table = dict()
@@ -73,13 +164,19 @@ class DummyDefinitionDecoder(json.JSONDecoder):
         self.__add_symbol(kan())
         self.__add_symbol(temperature())
         self.__add_symbol(timepoint())
+        self.__add_symbol(condition_block(iptg()))
+        self.__add_symbol(
+            strain_block(nand_circuit(), empty_landing_pads(), kan()))
         super().__init__(object_hook=self.convert)
 
     def convert(self, d):
         return BlockDefinitionDecoder(self.__symbol_table).object_hook(d)
 
     def __add_symbol(self, obj):
-        self.__symbol_table[obj.name] = obj
+        if isinstance(obj, DesignBlock):
+            self.__symbol_table[obj.label] = obj
+        else:
+            self.__symbol_table[obj.name] = obj
 
 
 class DummyDesignDecoder(json.JSONDecoder):
@@ -182,64 +279,73 @@ class TestDefinitionBlock:
         b2 = json.loads(b_json, cls=DummyDefinitionDecoder)
         assert b1 == b2
 
-    def test_replicate_block(self):
-        b1 = ReplicateBlock(count=4, block=BlockReference(label='conditions'))
-        b2 = ReplicateBlock(count=4, block=BlockReference(label='conditions'))
+    def test_replicate_block(self, condition_block):
+        b1 = ReplicateBlock(count=4,
+                            block=BlockReference(block=condition_block))
+        b2 = ReplicateBlock(count=4,
+                            block=BlockReference(block=condition_block))
 
         assert b1 == b1
         assert b1 == b2
         assert b1 != {}
 
         assert repr(
-            b1) == "ReplicateBlock(count=4, block=BlockReference(label='conditions'))"
+            b1) == "ReplicateBlock(count=4, block=BlockReference(block=DesignBlock(label='conditions', definition=ProductBlock(block_list=[GenerateBlock(treatment=EntityTreatment(entity=NamedEntity(name='IPTG', reference='https://hub.sd2e.org/user/sd2e/design/IPTG/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])), values=[Value(value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=0.25, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=2.5, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=25, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=250, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))]), GenerateBlock(treatment=EntityTreatment(entity=NamedEntity(name='L-arabinose', reference='https://hub.sd2e.org/user/sd2e/design/Larabinose/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])), values=[Value(value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=5, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=50, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=500, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=5000, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=25000, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])]))))"
 
-    def test_replicate_block_serialization(self):
-        b1 = ReplicateBlock(count=4, block=BlockReference(label='conditions'))
+    def test_replicate_block_serialization(self, condition_block):
+        b1 = ReplicateBlock(count=4,
+                            block=BlockReference(block=condition_block))
         b_json = json.dumps(b1, cls=BlockDefinitionEncoder)
         assert b_json == '{"block_type": "replicate_block", "count": 4, "block": {"block_type": "block_reference", "reference": "conditions"}}'
         b2 = json.loads(b_json, cls=DummyDefinitionDecoder)
         assert b1 == b2
 
-    def test_sum_block(self):
+    def test_sum_block(self, condition_block, strain_block):
         b1 = SumBlock(block_list=[
-            BlockReference(label='strains'), BlockReference(label='conditions')
+            BlockReference(block=strain_block),
+            BlockReference(block=condition_block)
         ])
         b2 = SumBlock(block_list=[
-            BlockReference(label='strains'), BlockReference(label='conditions')
+            BlockReference(block=strain_block),
+            BlockReference(block=condition_block)
         ])
         assert b1 == b1
         assert b1 == b2
         assert b1 != {}
 
         assert repr(
-            b1) == "SumBlock(block_list=[BlockReference(label='strains'), BlockReference(label='conditions')])"
+            b1) == "SumBlock(block_list=[BlockReference(block=DesignBlock(label='strains', definition=SumBlock(block_list=[TupleBlock(block_list=[SubjectReference(entity=NamedEntity(name='MG1655_NAND_Circuit', reference='https://hub.sd2e.org/user/sd2e/design/MG1655_NAND_Circuit/1')), TreatmentReference(treatment=EntityTreatment(entity=NamedEntity(name='Kan', reference='https://hub.sd2e.org/user/sd2e/design/Kan/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000274'))])))]), SubjectReference(entity=NamedEntity(name='MG1655_empty_landing_pads', reference='https://hub.sd2e.org/user/sd2e/design/MG1655_empty_landing_pads/1'))]))), BlockReference(block=DesignBlock(label='conditions', definition=ProductBlock(block_list=[GenerateBlock(treatment=EntityTreatment(entity=NamedEntity(name='IPTG', reference='https://hub.sd2e.org/user/sd2e/design/IPTG/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])), values=[Value(value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=0.25, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=2.5, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=25, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=250, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))]), GenerateBlock(treatment=EntityTreatment(entity=NamedEntity(name='L-arabinose', reference='https://hub.sd2e.org/user/sd2e/design/Larabinose/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])), values=[Value(value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=5, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=50, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=500, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=5000, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=25000, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])])))])"
 
-    def test_sum_block_serialization(self):
+    def test_sum_block_serialization(self, condition_block, strain_block):
         b1 = SumBlock(block_list=[
-            BlockReference(label='strains'), BlockReference(label='conditions')
+            BlockReference(block=strain_block),
+            BlockReference(block=condition_block)
         ])
         b_json = json.dumps(b1, cls=BlockDefinitionEncoder)
         assert b_json == '{"block_type": "sum_block", "block_list": [{"block_type": "block_reference", "reference": "strains"}, {"block_type": "block_reference", "reference": "conditions"}]}'
         b2 = json.loads(b_json, cls=DummyDefinitionDecoder)
         assert b1 == b2
 
-    def test_tuple_block(self):
+    def test_tuple_block(self, condition_block, strain_block):
         b1 = TupleBlock(block_list=[
-            BlockReference(label='strains'), BlockReference(label='conditions')
+            BlockReference(block=strain_block),
+            BlockReference(block=condition_block)
         ])
         b2 = TupleBlock(block_list=[
-            BlockReference(label='strains'), BlockReference(label='conditions')
+            BlockReference(block=strain_block),
+            BlockReference(block=condition_block)
         ])
         assert b1 == b1
         assert b1 == b2
         assert b1 != {}
 
         assert repr(
-            b1) == "TupleBlock(block_list=[BlockReference(label='strains'), BlockReference(label='conditions')])"
+            b1) == "TupleBlock(block_list=[BlockReference(block=DesignBlock(label='strains', definition=SumBlock(block_list=[TupleBlock(block_list=[SubjectReference(entity=NamedEntity(name='MG1655_NAND_Circuit', reference='https://hub.sd2e.org/user/sd2e/design/MG1655_NAND_Circuit/1')), TreatmentReference(treatment=EntityTreatment(entity=NamedEntity(name='Kan', reference='https://hub.sd2e.org/user/sd2e/design/Kan/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000274'))])))]), SubjectReference(entity=NamedEntity(name='MG1655_empty_landing_pads', reference='https://hub.sd2e.org/user/sd2e/design/MG1655_empty_landing_pads/1'))]))), BlockReference(block=DesignBlock(label='conditions', definition=ProductBlock(block_list=[GenerateBlock(treatment=EntityTreatment(entity=NamedEntity(name='IPTG', reference='https://hub.sd2e.org/user/sd2e/design/IPTG/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])), values=[Value(value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=0.25, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=2.5, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=25, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=250, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))]), GenerateBlock(treatment=EntityTreatment(entity=NamedEntity(name='L-arabinose', reference='https://hub.sd2e.org/user/sd2e/design/Larabinose/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])), values=[Value(value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=5, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=50, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=500, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=5000, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=25000, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])])))])"
 
-    def test_tuple_block_serialization(self):
+    def test_tuple_block_serialization(self, condition_block, strain_block):
         b1 = TupleBlock(block_list=[
-            BlockReference(label='strains'), BlockReference(label='conditions')
+            BlockReference(block=strain_block),
+            BlockReference(block=condition_block)
         ])
         b_json = json.dumps(b1, cls=BlockDefinitionEncoder)
         assert b_json == '{"block_type": "tuple_block", "block_list": [{"block_type": "block_reference", "reference": "strains"}, {"block_type": "block_reference", "reference": "conditions"}]}'
@@ -249,17 +355,17 @@ class TestDefinitionBlock:
 
 class TestReference:
 
-    def test_block_reference(self):
-        r1 = BlockReference(label='strains')
-        r2 = BlockReference(label='strains')
+    def test_block_reference(self, strain_block):
+        r1 = BlockReference(block=strain_block)
+        r2 = BlockReference(block=strain_block)
         assert r1 == r1
         assert r1 == r2
         assert r1 != {}
 
-        assert repr(r1) == "BlockReference(label='strains')"
+        assert repr(r1) == "BlockReference(block=DesignBlock(label='strains', definition=SumBlock(block_list=[TupleBlock(block_list=[SubjectReference(entity=NamedEntity(name='MG1655_NAND_Circuit', reference='https://hub.sd2e.org/user/sd2e/design/MG1655_NAND_Circuit/1')), TreatmentReference(treatment=EntityTreatment(entity=NamedEntity(name='Kan', reference='https://hub.sd2e.org/user/sd2e/design/Kan/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000274'))])))]), SubjectReference(entity=NamedEntity(name='MG1655_empty_landing_pads', reference='https://hub.sd2e.org/user/sd2e/design/MG1655_empty_landing_pads/1'))])))"
 
-    def test_block_reference_serialization(self):
-        r1 = BlockReference(label='strains')
+    def test_block_reference_serialization(self, strain_block):
+        r1 = BlockReference(block=strain_block)
         r_json = json.dumps(r1, cls=BlockDefinitionEncoder)
         assert r_json == '{"block_type": "block_reference", "reference": "strains"}'
         r2 = json.loads(r_json, cls=DummyDefinitionDecoder)
@@ -294,7 +400,6 @@ class TestReference:
     def test_treatment_attribute_reference_serialization(self, iptg):
         r1 = TreatmentReference(treatment=iptg)
         r_json = json.dumps(r1, cls=BlockDefinitionEncoder)
-        assert r_json == '{"block_type": "treatment_reference", "reference": "IPTG"}'
         r2 = json.loads(r_json, cls=DummyDefinitionDecoder)
         assert r1 == r2
 
@@ -323,7 +428,8 @@ class TestReference:
             treatment=iptg,
             value=Value(
                 value=0,
-                unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')))
+                unit=Unit(
+                    reference='http://purl.obolibrary.org/obo/UO_0000064')))
         r_json = json.dumps(r1, cls=BlockDefinitionEncoder)
         r2 = json.loads(r_json, cls=DummyDefinitionDecoder)
         assert r1 == r2
@@ -341,7 +447,6 @@ class TestReference:
     def test_subject_reference_serialization(self, kan):
         r1 = TreatmentReference(treatment=kan)
         r_json = json.dumps(r1, cls=BlockDefinitionEncoder)
-        assert r_json == '{"block_type": "treatment_reference", "reference": "Kan"}'
         r2 = json.loads(r_json, cls=DummyDefinitionDecoder)
         assert r1 == r2
 
