@@ -31,7 +31,8 @@ class BlockReferenceEncoder(json.JSONEncoder):
 
 
 class BlockReferenceDecoder(json.JSONDecoder):
-    def __init__(self):
+    def __init__(self, symbol_table):
+        self.__symbol_table = symbol_table
         super().__init__(object_hook=self.convert)
 
     def convert(self, d):
@@ -41,8 +42,8 @@ class BlockReferenceDecoder(json.JSONDecoder):
             return d
         if 'reference' not in d:
             return d
-
-        return BlockReference(label=d['reference'])
+        block = self.__symbol_table[d['reference']]
+        return BlockReference(block=block)
 
 
 class DesignBlockEncoder(json.JSONEncoder):
@@ -348,7 +349,7 @@ class BlockDefinitionDecoder(json.JSONDecoder):
         if 'block_type' not in d:
             return d
         if d['block_type'] == 'block_reference':
-            return BlockReferenceDecoder().object_hook(d)
+            return BlockReferenceDecoder(self.__symbol_table).object_hook(d)
         if d['block_type'] == 'generate_block':
             return GenerateBlockDecoder(self.__symbol_table).object_hook(d)
         if d['block_type'] == 'product_block':

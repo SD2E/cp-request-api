@@ -143,6 +143,13 @@ class ExperimentDecoder(json.JSONDecoder):
         for treatment in treatments:
             symbol_table[treatment.name] = treatment
 
+        designs = list()
+        for design in d['designs']:
+            decoder = DesignBlockDecoder(symbol_table)
+            decoded_design = decoder.object_hook(design)
+            designs.append(decoded_design)
+            symbol_table[decoded_design.label] = decoded_design
+
         return ExperimentalRequest(
             cp_name=d['challenge_problem'],
             reference_name=d['experiment_reference'],
@@ -151,10 +158,7 @@ class ExperimentDecoder(json.JSONDecoder):
             derived_from=derived_from,
             subjects=subjects,
             treatments=treatments,
-            designs=[
-                DesignBlockDecoder(symbol_table).object_hook(design)
-                for design in d['designs']
-            ],
+            designs=designs,
             measurements=[
                 MeasurementDecoder(symbol_table).object_hook(measurement)
                 for measurement in d['measurements']
