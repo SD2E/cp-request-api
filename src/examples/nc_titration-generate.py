@@ -155,9 +155,9 @@ def main():
             ReplicateBlock(
                 count=4,
                 block=ProductBlock(block_list=[
-                    BlockReference(label='strains'),
-                    BlockReference(label='temperature-media'),
-                    BlockReference(label='conditions')
+                    BlockReference(block=strain_block),
+                    BlockReference(block=temperature_block),
+                    BlockReference(block=condition_block)
                 ])
             ),
             GenerateBlock(
@@ -182,7 +182,7 @@ def main():
 
     flow_measurement = Measurement(
         type='FLOW',
-        block=BlockReference(label='experiment'),
+        block=BlockReference(block=experiment_block),
         controls=[
             Control(
                 name='positive_gfp',
@@ -211,17 +211,17 @@ def main():
     )
     plate_reader_measurement = Measurement(
         type='PLATE_READER',
-        block=BlockReference(label='experiment'),
+        block=BlockReference(block=experiment_block),
         performers=['Ginkgo']
     )
     rnaseq_measurement = Measurement(
         type='RNA_SEQ',
-        block=BlockReference(label='experiment'),
+        block=BlockReference(block=experiment_block),
         performers=['Ginkgo']
     )
     proteomic_measurement = Measurement(
         type='PROTEOMICS',
-        block=BlockReference(label='experiment'),
+        block=BlockReference(block=experiment_block),
         performers=['Ginkgo']
     )
 
@@ -255,7 +255,7 @@ def main():
             proteomic_measurement
         ]
     )
-    
+
     with open('nc_titration_generated.json', 'w') as file:
         json.dump(request, file, cls=ExperimentEncoder, indent=2)
 
