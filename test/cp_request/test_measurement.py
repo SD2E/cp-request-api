@@ -48,15 +48,18 @@ def iptg():
 
 @pytest.fixture
 def empty_landing_pads():
+    ref = "https://hub.sd2e.org/user/sd2e/design/MG1655_empty_landing_pads/1"
     return NamedEntity(
         name="MG1655_empty_landing_pads",
-        reference="https://hub.sd2e.org/user/sd2e/design/MG1655_empty_landing_pads/1"
+        reference=ref
     )
 
 
 @pytest.fixture
 def timepoint():
-    hour_unit = Unit(reference='http://purl.obolibrary.org/obo/UO_0000032')
+    hour_unit = Unit(
+        reference='http://purl.obolibrary.org/obo/UO_0000032'
+    )
     return Treatment.create_from(
         attribute=Attribute.create_from(
             name='timepoint',
@@ -151,8 +154,8 @@ def condition_block(iptg):
                 treatment=iptg,
                 values=[
                     Value(
-                                value=0,
-                                unit=micromolar_unit),
+                        value=0,
+                        unit=micromolar_unit),
                     Value(
                         value=0.25,
                         unit=micromolar_unit),
@@ -193,7 +196,7 @@ def condition_block(iptg):
 
 
 @pytest.fixture
-def experiment_block(strain_block, temperature_block, condition_block):
+def experiment_block(strain_block, temperature_block, condition_block, timepoint):
     hour_unit = Unit(reference='http://purl.obolibrary.org/obo/UO_0000032')
     return DesignBlock(
         label='experiment',
@@ -240,7 +243,8 @@ class DummyMeasurementDecoder(json.JSONDecoder):
                     empty_landing_pads(), kan()
                 ),
                 temperature_block(),
-                condition_block(iptg())))
+                condition_block(iptg()),
+                timepoint()))
         super().__init__(object_hook=self.convert)
 
     def convert(self, d):
@@ -290,12 +294,24 @@ class TestControl:
             sample=Sample(
                 subject=nand_circuit,
                 treatments=[
-                    TreatmentReference.create_from(treatment=timepoint, value=Value(
-                        value=18, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))),
+                    TreatmentReference.create_from(
+                        treatment=timepoint,
+                        value=Value(
+                            value=18,
+                            unit=Unit(
+                                reference='http://purl.obolibrary.org/obo/UO_0000032'
+                            )
+                        )
+                    ),
                     TreatmentReference.create_from(
                         treatment=iptg,
                         value=Value(
-                            value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')))
+                            value=0,
+                            unit=Unit(
+                                reference='http://purl.obolibrary.org/obo/UO_0000064'
+                            )
+                        )
+                    )
                 ]
             )
         )
@@ -304,12 +320,24 @@ class TestControl:
             sample=Sample(
                 subject=nand_circuit,
                 treatments=[
-                    TreatmentReference.create_from(treatment=timepoint, value=Value(
-                        value=18, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))),
+                    TreatmentReference.create_from(
+                        treatment=timepoint,
+                        value=Value(
+                            value=18,
+                            unit=Unit(
+                                reference='http://purl.obolibrary.org/obo/UO_0000032'
+                            )
+                        )
+                    ),
                     TreatmentReference.create_from(
                         treatment=iptg,
                         value=Value(
-                            value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')))
+                            value=0,
+                            unit=Unit(
+                                reference='http://purl.obolibrary.org/obo/UO_0000064'
+                            )
+                        )
+                    )
                 ]
             )
         )
@@ -328,11 +356,20 @@ class TestControl:
                     TreatmentReference.create_from(
                         treatment=timepoint,
                         value=Value(
-                            value=18, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))),
+                            value=18,
+                            unit=Unit(
+                                reference='http://purl.obolibrary.org/obo/UO_0000032'
+                            )
+                        )
+                    ),
                     TreatmentReference.create_from(
                         treatment=iptg,
                         value=Value(
-                            value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')))
+                            value=0, unit=Unit(
+                                reference='http://purl.obolibrary.org/obo/UO_0000064'
+                            )
+                        )
+                    )
                 ]
             )
         )
@@ -370,23 +407,47 @@ class TestSample:
         s1 = Sample(
             subject=nand_circuit,
             treatments=[
-                TreatmentReference.create_from(treatment=timepoint, value=Value(
-                    value=18, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))),
+                TreatmentReference.create_from(
+                    treatment=timepoint,
+                    value=Value(
+                        value=18,
+                        unit=Unit(
+                            reference='http://purl.obolibrary.org/obo/UO_0000032'
+                        )
+                    )
+                ),
                 TreatmentReference.create_from(
                     treatment=iptg,
                     value=Value(
-                        value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')))
+                        value=0,
+                        unit=Unit(
+                            reference='http://purl.obolibrary.org/obo/UO_0000064'
+                        )
+                    )
+                )
             ]
         )
         s2 = Sample(
             subject=nand_circuit,
             treatments=[
-                TreatmentReference.create_from(treatment=timepoint, value=Value(
-                    value=18, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))),
+                TreatmentReference.create_from(
+                    treatment=timepoint,
+                    value=Value(
+                        value=18,
+                        unit=Unit(
+                            reference='http://purl.obolibrary.org/obo/UO_0000032'
+                        )
+                    )
+                ),
                 TreatmentReference.create_from(
                     treatment=iptg,
                     value=Value(
-                        value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')))
+                        value=0,
+                        unit=Unit(
+                            reference='http://purl.obolibrary.org/obo/UO_0000064'
+                        )
+                    )
+                )
             ]
         )
         assert s1 == s1
@@ -399,12 +460,24 @@ class TestSample:
         s1 = Sample(
             subject=nand_circuit,
             treatments=[
-                TreatmentReference.create_from(treatment=timepoint, value=Value(
-                    value=18, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))),
+                TreatmentReference.create_from(
+                    treatment=timepoint,
+                    value=Value(
+                        value=18,
+                        unit=Unit(
+                            reference='http://purl.obolibrary.org/obo/UO_0000032'
+                        )
+                    )
+                ),
                 TreatmentReference.create_from(
                     treatment=iptg,
                     value=Value(
-                        value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')))
+                        value=0,
+                        unit=Unit(
+                            reference='http://purl.obolibrary.org/obo/UO_0000064'
+                        )
+                    )
+                )
             ]
         )
         s_json = json.dumps(s1, cls=SampleEncoder)
@@ -423,12 +496,24 @@ class TestMeasurement:
                     sample=Sample(
                         subject=nand_circuit,
                         treatments=[
-                            TreatmentReference.create_from(treatment=timepoint, value=Value(
-                                value=18, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))),
+                            TreatmentReference.create_from(
+                                treatment=timepoint,
+                                value=Value(
+                                    value=18,
+                                    unit=Unit(
+                                        reference='http://purl.obolibrary.org/obo/UO_0000032'
+                                    )
+                                )
+                            ),
                             TreatmentReference.create_from(
                                 treatment=iptg,
                                 value=Value(
-                                    value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')))
+                                    value=0,
+                                    unit=Unit(
+                                        reference='http://purl.obolibrary.org/obo/UO_0000064'
+                                    )
+                                )
+                            )
                         ]
                     )
                 ),
@@ -448,12 +533,24 @@ class TestMeasurement:
                     sample=Sample(
                         subject=nand_circuit,
                         treatments=[
-                            TreatmentReference.create_from(treatment=timepoint, value=Value(
-                                value=18, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))),
+                            TreatmentReference.create_from(
+                                treatment=timepoint,
+                                value=Value(
+                                    value=18,
+                                    unit=Unit(
+                                        reference='http://purl.obolibrary.org/obo/UO_0000032'
+                                    )
+                                )
+                            ),
                             TreatmentReference.create_from(
                                 treatment=iptg,
                                 value=Value(
-                                    value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')))
+                                    value=0,
+                                    unit=Unit(
+                                        reference='http://purl.obolibrary.org/obo/UO_0000064'
+                                    )
+                                )
+                            )
                         ]
                     )
                 ),
@@ -468,7 +565,7 @@ class TestMeasurement:
         assert m1 == m2
         assert m1 != {}
         # TODO: figure out why this fails
-        # assert repr(m1) == "Measurement(type='FLOW', block=BlockReference(block=DesignBlock(label='experiment', definition=ProductBlock(block_list=[ReplicateBlock(count=4, block=ProductBlock(block_list=[BlockReference(block=DesignBlock(label='strains', definition=SumBlock(block_list=[TupleBlock(block_list=[SubjectReference(entity=NamedEntity(name='MG1655_NAND_Circuit', reference='https://hub.sd2e.org/user/sd2e/design/MG1655_NAND_Circuit/1')), TreatmentReference(treatment=EntityTreatment(entity=NamedEntity(name='Kan', reference='https://hub.sd2e.org/user/sd2e/design/Kan/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000274'))])))]), SubjectReference(entity=NamedEntity(name='MG1655_empty_landing_pads', reference='https://hub.sd2e.org/user/sd2e/design/MG1655_empty_landing_pads/1'))]))), BlockReference(block=DesignBlock(label='temperature-media', definition=TupleBlock(block_list=[TreatmentReference(treatment=AttributeTreatment(attribute=BoundAttribute(name='temperature', value=Value(value=37.0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000027'))))), TreatmentReference(treatment=EntityTreatment(entity=NamedEntity(name='M9 Glucose CAA', reference='https://hub.sd2e.org/user/sd2e/design/M9_glucose_CAA/1')))]))), BlockReference(block=DesignBlock(label='conditions', definition=ProductBlock(block_list=[GenerateBlock(treatment=EntityTreatment(entity=NamedEntity(name='IPTG', reference='https://hub.sd2e.org/user/sd2e/design/IPTG/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])), values=[Value(value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=0.25, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=2.5, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=25, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=250, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))]), GenerateBlock(treatment=EntityTreatment(entity=NamedEntity(name='L-arabinose', reference='https://hub.sd2e.org/user/sd2e/design/Larabinose/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])), values=[Value(value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=5, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=50, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=500, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=5000, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=25000, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])])))])), GenerateBlock(treatment=<function timepoint at 0x7ff42a8b6048>, values=[Value(value=5, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032')), Value(value=6.5, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032')), Value(value=8, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032')), Value(value=18, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))])]))), controls=[Control(name='positive_gfp', sample=Sample(subject=NamedEntity(name='MG1655_NAND_Circuit', reference='https://hub.sd2e.org/user/sd2e/design/MG1655_NAND_Circuit/1'), treatments=[TreatmentValueReference(treatment=AttributeTreatment(attribute=UnboundAttribute(name='timepoint', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))), value=Value(value=18, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))), TreatmentValueReference(treatment=EntityTreatment(entity=NamedEntity(name='IPTG', reference='https://hub.sd2e.org/user/sd2e/design/IPTG/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])), value=Value(value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')))])), Control(name='negative_gfp', sample=Sample(subject=NamedEntity(name='MG1655_empty_landing_pads', reference='https://hub.sd2e.org/user/sd2e/design/MG1655_empty_landing_pads/1'), treatments=[]))], performers=['Ginkgo'])"
+        assert repr(m1) == "Measurement(type='FLOW', block=BlockReference(block=DesignBlock(label='experiment', definition=ProductBlock(block_list=[ReplicateBlock(count=4, block=ProductBlock(block_list=[BlockReference(block=DesignBlock(label='strains', definition=SumBlock(block_list=[TupleBlock(block_list=[SubjectReference(entity=NamedEntity(name='MG1655_NAND_Circuit', reference='https://hub.sd2e.org/user/sd2e/design/MG1655_NAND_Circuit/1')), TreatmentReference(treatment=EntityTreatment(entity=NamedEntity(name='Kan', reference='https://hub.sd2e.org/user/sd2e/design/Kan/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000274'))])))]), SubjectReference(entity=NamedEntity(name='MG1655_empty_landing_pads', reference='https://hub.sd2e.org/user/sd2e/design/MG1655_empty_landing_pads/1'))]))), BlockReference(block=DesignBlock(label='temperature-media', definition=TupleBlock(block_list=[TreatmentReference(treatment=AttributeTreatment(attribute=BoundAttribute(name='temperature', value=Value(value=37.0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000027'))))), TreatmentReference(treatment=EntityTreatment(entity=NamedEntity(name='M9 Glucose CAA', reference='https://hub.sd2e.org/user/sd2e/design/M9_glucose_CAA/1')))]))), BlockReference(block=DesignBlock(label='conditions', definition=ProductBlock(block_list=[GenerateBlock(treatment=EntityTreatment(entity=NamedEntity(name='IPTG', reference='https://hub.sd2e.org/user/sd2e/design/IPTG/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])), values=[Value(value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=0.25, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=2.5, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=25, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=250, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))]), GenerateBlock(treatment=EntityTreatment(entity=NamedEntity(name='L-arabinose', reference='https://hub.sd2e.org/user/sd2e/design/Larabinose/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])), values=[Value(value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=5, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=50, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=500, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=5000, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')), Value(value=25000, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])])))])), GenerateBlock(treatment=AttributeTreatment(attribute=UnboundAttribute(name='timepoint', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))), values=[Value(value=5, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032')), Value(value=6.5, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032')), Value(value=8, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032')), Value(value=18, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))])]))), controls=[Control(name='positive_gfp', sample=Sample(subject=NamedEntity(name='MG1655_NAND_Circuit', reference='https://hub.sd2e.org/user/sd2e/design/MG1655_NAND_Circuit/1'), treatments=[TreatmentValueReference(treatment=AttributeTreatment(attribute=UnboundAttribute(name='timepoint', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))), value=Value(value=18, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))), TreatmentValueReference(treatment=EntityTreatment(entity=NamedEntity(name='IPTG', reference='https://hub.sd2e.org/user/sd2e/design/IPTG/1', attributes=[UnboundAttribute(name='concentration', unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064'))])), value=Value(value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')))])), Control(name='negative_gfp', sample=Sample(subject=NamedEntity(name='MG1655_empty_landing_pads', reference='https://hub.sd2e.org/user/sd2e/design/MG1655_empty_landing_pads/1'), treatments=[]))], performers=['Ginkgo'])"
 
     def test_measurement_serialization(self, nand_circuit, timepoint, iptg, empty_landing_pads, experiment_block):
         m1 = Measurement(
@@ -480,12 +577,24 @@ class TestMeasurement:
                     sample=Sample(
                         subject=nand_circuit,
                         treatments=[
-                            TreatmentReference.create_from(treatment=timepoint, value=Value(
-                                value=18, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000032'))),
+                            TreatmentReference.create_from(
+                                treatment=timepoint,
+                                value=Value(
+                                    value=18,
+                                    unit=Unit(
+                                        reference='http://purl.obolibrary.org/obo/UO_0000032'
+                                    )
+                                )
+                            ),
                             TreatmentReference.create_from(
                                 treatment=iptg,
                                 value=Value(
-                                    value=0, unit=Unit(reference='http://purl.obolibrary.org/obo/UO_0000064')))
+                                    value=0,
+                                    unit=Unit(
+                                        reference='http://purl.obolibrary.org/obo/UO_0000064'
+                                    )
+                                )
+                            )
                         ]
                     )
                 ),
