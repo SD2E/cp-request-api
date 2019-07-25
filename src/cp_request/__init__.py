@@ -20,3 +20,5 @@ from cp_request.measurement import (
 from cp_request.experimental_request import (
     ExperimentalRequest, ExperimentEncoder, ExperimentDecoder
 )
+
+from cp_request.visitor import RequestVisitor
