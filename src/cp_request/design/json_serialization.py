@@ -9,8 +9,7 @@ from cp_request.design import (
     SubjectReference,
     SumBlock,
     TreatmentReference,
-    TreatmentValueReference,
-    TupleBlock
+    TreatmentValueReference
 )
 from cp_request.design.block_definition import BlockDefinition
 from cp_request import (
@@ -287,39 +286,6 @@ class TreatmentReferenceDecoder(json.JSONDecoder):
         return TreatmentReference(treatment=treatment)
 
 
-class TupleBlockEncoder(json.JSONEncoder):
-    def default(self, obj):
-        # pylint: disable=E0202
-        if isinstance(obj, TupleBlock):
-            rep = dict()
-            rep['block_type'] = 'tuple_block'
-            rep['block_list'] = [
-                BlockDefinitionEncoder().default(block)
-                for block in obj.block_list
-            ]
-            return rep
-        return super().default(obj)
-
-
-class TupleBlockDecoder(json.JSONDecoder):
-    def __init__(self, symbol_table):
-        self.__symbol_table = symbol_table
-        super().__init__(object_hook=self.convert)
-
-    def convert(self, d):
-        if 'block_type' not in d:
-            return d
-        if d['block_type'] != 'tuple_block':
-            return d
-        if 'block_list' not in d:
-            return d
-
-        return TupleBlock(block_list=[
-            BlockDefinitionDecoder(self.__symbol_table).object_hook(block)
-            for block in d['block_list']
-        ])
-
-
 class BlockDefinitionEncoder(json.JSONEncoder):
 
     def default(self, obj):
@@ -338,8 +304,6 @@ class BlockDefinitionEncoder(json.JSONEncoder):
             return SumBlockEncoder().default(obj)
         if isinstance(obj, TreatmentReference):
             return TreatmentReferenceEncoder().default(obj)
-        if isinstance(obj, TupleBlock):
-            return TupleBlockEncoder().default(obj)
         return super().default(obj)
 
 
@@ -365,8 +329,6 @@ class BlockDefinitionDecoder(json.JSONDecoder):
             return SubjectReferenceDecoder(self.__symbol_table).object_hook(d)
         if d['block_type'] == 'sum_block':
             return SumBlockDecoder(self.__symbol_table).object_hook(d)
-        if d['block_type'] == 'tuple_block':
-            return TupleBlockDecoder(self.__symbol_table).object_hook(d)
 
         if (d['block_type'] == 'treatment_reference'
                 or d['block_type'] == 'value_treatment_reference'):

@@ -20,8 +20,7 @@ from cp_request.design import (
     ReplicateBlock,
     SubjectReference,
     SumBlock,
-    TreatmentReference,
-    TupleBlock
+    TreatmentReference
 )
 
 
@@ -89,7 +88,7 @@ def main():
     strain_block = DesignBlock(
         label='strains',
         definition=SumBlock(block_list=[
-            TupleBlock(block_list=[
+            ProductBlock(block_list=[
                 SubjectReference(entity=nand_circuit),
                 TreatmentReference(treatment=kan)
             ]),
@@ -98,7 +97,7 @@ def main():
     )
     temperature_block = DesignBlock(
         label='temperature-media',
-        definition=TupleBlock(block_list=[
+        definition=ProductBlock(block_list=[
             TreatmentReference(treatment=temperature),
             TreatmentReference(treatment=media)
         ])
@@ -108,10 +107,11 @@ def main():
         definition=ProductBlock(block_list=[
             GenerateBlock(
                 treatment=iptg,
+                attribute_name='concentration',
                 values=[
                     Value(
-                                value=0,
-                                unit=micromolar_unit),
+                        value=0,
+                        unit=micromolar_unit),
                     Value(
                         value=0.25,
                         unit=micromolar_unit),
@@ -127,6 +127,7 @@ def main():
                 ]),
             GenerateBlock(
                 treatment=l_arabinose,
+                attribute_name='concentration',
                 values=[
                     Value(
                         value=0,
@@ -162,6 +163,7 @@ def main():
             ),
             GenerateBlock(
                 treatment=timepoint,
+                attribute_name='timepoint',
                 values=[
                     Value(
                         value=5,

@@ -21,8 +21,7 @@ from cp_request.design import (
     SumBlock,
     SubjectReference,
     TreatmentReference,
-    TreatmentValueReference,
-    TupleBlock
+    TreatmentValueReference
 )
 
 
@@ -43,9 +42,6 @@ class RequestVisitor(abc.ABC):
         return
 
     def visit_product_block(self, block: ProductBlock):
-        return
-
-    def visit_tuple_block(self, block: TupleBlock):
         return
 
     def visit_block_reference(self, reference: BlockReference):
