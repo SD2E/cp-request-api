@@ -87,6 +87,7 @@ class GenerateBlockEncoder(json.JSONEncoder):
             rep = dict()
             rep['block_type'] = 'generate_block'
             rep['treatment_name'] = obj.treatment.name
+            rep['attribute_name'] = obj.attribute_name
             rep['values'] = [
                 ValueEncoder().default(value) for value in obj.values
             ]
@@ -104,13 +105,17 @@ class GenerateBlockDecoder(json.JSONDecoder):
             return d
         if d['block_type'] != 'generate_block':
             return d
+        if 'attribute_name' not in d:
+            return d
         if 'treatment_name' not in d:
             return d
         if d['treatment_name'] not in self.__symbol_table:
             return d
+
         treatment = self.__symbol_table[d['treatment_name']]
         return GenerateBlock(
             treatment=treatment,
+            attribute_name=d['attribute_name'],
             values=[
                 ValueDecoder().object_hook(value) for value in d['values']
             ])

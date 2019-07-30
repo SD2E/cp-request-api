@@ -12,13 +12,17 @@ class GenerateBlock(BlockDefinition):
     attribute(s) of the treatment.
     """
 
-    def __init__(self, *, treatment: TreatmentReference, values: List[Value]):
+    def __init__(self, *,
+                 treatment: TreatmentReference,
+                 attribute_name: str,
+                 values: List[Value]):
         self.__treatment = treatment
+        self.__attribute_name = attribute_name
         self.__values = values
 
     def __repr__(self):
-        return "GenerateBlock(treatment={}, values={})".format(
-            repr(self.__treatment), repr(self.__values))
+        return "GenerateBlock(treatment={}, attribute_name={}, values={})".format(
+            repr(self.__treatment), repr(self.__attribute_name), repr(self.__values))
 
     # TODO: implement str method
     def __str__(self):
@@ -28,16 +32,20 @@ class GenerateBlock(BlockDefinition):
         if not isinstance(other, GenerateBlock):
             return False
         return (self.__treatment == other.__treatment and
+                self.__attribute_name == other.__attribute_name and
                 self.__values == other.__values)
 
-        def apply(self, visitor):
-            visitor.visit_generate_block(self)
+    def apply(self, visitor):
+        visitor.visit_generate_block(self)
 
     @property
     def treatment(self):
         return self.__treatment
 
     @property
+    def attribute_name(self):
+        return self.__attribute_name
+
+    @property
     def values(self):
         return self.__values
-
