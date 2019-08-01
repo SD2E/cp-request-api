@@ -1,6 +1,6 @@
 from cp_request import Treatment, Value
 from cp_request.design.block_definition import BlockDefinition
-from transform.transformer import RequestTransformer
+from transform import RequestTransformer
 from typing import Union
 
 

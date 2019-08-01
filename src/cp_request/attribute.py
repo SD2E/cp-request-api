@@ -4,7 +4,7 @@ from cp_request import (
     Unit, UnitEncoder, UnitDecoder,
     Value, ValueEncoder, ValueDecoder
 )
-from transform.transformer import RequestTransformer
+from transform import RequestTransformer
 
 
 class Attribute:

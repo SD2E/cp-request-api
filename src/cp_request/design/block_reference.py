@@ -1,6 +1,6 @@
 from cp_request.design.design_block import DesignBlock
 from cp_request.design.block_definition import BlockDefinition
-from transform.transformer import RequestTransformer
+from transform import RequestTransformer
 
 
 class BlockReference(BlockDefinition):
