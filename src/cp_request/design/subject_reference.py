@@ -1,5 +1,6 @@
 from cp_request import NamedEntity
 from cp_request.design.block_definition import BlockDefinition
+from transform.transformer import RequestTransformer
 
 
 class SubjectReference(BlockDefinition):
@@ -23,6 +24,9 @@ class SubjectReference(BlockDefinition):
 
     def apply(self, visitor):
         visitor.visit_subject_reference(self)
+
+    def transform(self, transformer: RequestTransformer):
+        transformer.transform_subject_reference(self)
 
     @property
     def entity(self):

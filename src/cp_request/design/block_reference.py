@@ -1,5 +1,6 @@
 from cp_request.design.design_block import DesignBlock
 from cp_request.design.block_definition import BlockDefinition
+from transform.transformer import RequestTransformer
 
 
 class BlockReference(BlockDefinition):
@@ -23,6 +24,13 @@ class BlockReference(BlockDefinition):
 
     def apply(self, visitor):
         visitor.visit_block_reference(self)
+
+    def transform(self, transformer: RequestTransformer):
+        return transformer.transform_block_reference(self)
+
+    @property
+    def block(self):
+        return self.__block
 
     @property
     def block_label(self):

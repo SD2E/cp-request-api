@@ -1,4 +1,5 @@
 from cp_request.design.block_definition import BlockDefinition
+from transform.transformer import RequestTransformer
 from typing import List
 
 
@@ -25,6 +26,9 @@ class ProductBlock(BlockDefinition):
 
     def apply(self, visitor):
         visitor.visit_product_block(self)
+
+    def transform(self, transformer: RequestTransformer):
+        return transformer.transform_product_block(self)
 
     @property
     def block_list(self):

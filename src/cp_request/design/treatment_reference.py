@@ -1,5 +1,6 @@
 from cp_request import Treatment, Value
 from cp_request.design.block_definition import BlockDefinition
+from transform.transformer import RequestTransformer
 from typing import Union
 
 
@@ -32,6 +33,9 @@ class TreatmentReference(BlockDefinition):
     def apply(self, visitor):
         visitor.visit_treatment_reference(self)
 
+    def transform(self, transformer: RequestTransformer):
+        return transformer.transform_treatment_reference(self)
+
     @property
     def treatment(self):
         return self.__treatment
@@ -59,6 +63,9 @@ class TreatmentValueReference(TreatmentReference):
 
     def apply(self, visitor):
         visitor.visit_treatment_value_reference(self)
+
+    def transform(self, transformer):
+        transformer.transform_treatment_value_reference(self)
 
     @property
     def value(self):

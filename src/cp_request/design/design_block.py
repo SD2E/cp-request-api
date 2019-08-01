@@ -1,4 +1,5 @@
 from cp_request.design.block_definition import BlockDefinition
+from transform.transformer import RequestTransformer
 
 
 class DesignBlock:
@@ -28,6 +29,9 @@ class DesignBlock:
 
     def apply(self, visitor):
         visitor.visit_design_block(self)
+
+    def transform(self, transformer: RequestTransformer):
+        return transformer.transform_design_block(self)
 
     @property
     def label(self):

@@ -1,6 +1,7 @@
 from cp_request import Value
 from cp_request.design import TreatmentReference
 from cp_request.design.block_definition import BlockDefinition
+from transform.transformer import RequestTransformer
 from typing import List
 
 
@@ -21,8 +22,12 @@ class GenerateBlock(BlockDefinition):
         self.__values = values
 
     def __repr__(self):
-        return "GenerateBlock(treatment={}, attribute_name={}, values={})".format(
-            repr(self.__treatment), repr(self.__attribute_name), repr(self.__values))
+        pattern = "GenerateBlock(treatment={}, attribute_name={}, values={})"
+        return pattern.format(
+            repr(self.__treatment),
+            repr(self.__attribute_name),
+            repr(self.__values)
+        )
 
     # TODO: implement str method
     def __str__(self):
@@ -37,6 +42,9 @@ class GenerateBlock(BlockDefinition):
 
     def apply(self, visitor):
         visitor.visit_generate_block(self)
+
+    def transform(self, transformer: RequestTransformer):
+        return transformer.transform_generate_block(self)
 
     @property
     def treatment(self):

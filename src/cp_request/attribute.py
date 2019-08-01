@@ -4,6 +4,7 @@ from cp_request import (
     Unit, UnitEncoder, UnitDecoder,
     Value, ValueEncoder, ValueDecoder
 )
+from transform.transformer import RequestTransformer
 
 
 class Attribute:
@@ -35,6 +36,9 @@ class Attribute:
 
     def apply(self, visitor):
         visitor.visit_attribute(self)
+
+    def transform(self, transformer: RequestTransformer):
+        transformer.transform_attribute(self)
 
     @property
     def name(self):

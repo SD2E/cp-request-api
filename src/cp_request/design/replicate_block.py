@@ -1,4 +1,5 @@
 from cp_request.design.block_definition import BlockDefinition
+from transform.transformer import RequestTransformer
 
 
 class ReplicateBlock(BlockDefinition):
@@ -26,6 +27,9 @@ class ReplicateBlock(BlockDefinition):
 
     def apply(self, visitor):
         visitor.visit_replicate_block(self)
+
+    def transform(self, transformer: RequestTransformer):
+        return transformer.transform_replicate_block(self)
 
     @property
     def count(self):
