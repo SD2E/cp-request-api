@@ -39,7 +39,9 @@ The proposed idea is to implement functions that could be used in a Jupyter note
 In this approach, the short request above might look like
 
 ```python
-exp = define_experiment('Yeast States with Live/Dead Stain').like('Yeast States').with_stain('live_dead_stain')
+exp = define_experiment('Yeast States with Live/Dead Stain')
+                  .like('Yeast States')
+                  .with_stain('live_dead_stain')
 ```
 
 which produces an experimental request with the live/dead stain unspecified by pulling the existing protocol named `'Yeast States'` from the pipeline.
