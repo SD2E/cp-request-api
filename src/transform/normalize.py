@@ -1,28 +1,28 @@
-from cp_request import (
-    Attribute,
-    Control,
-    ExperimentalRequest,
-    Measurement,
-    NamedEntity,
-    RequestVisitor,
-    Sample,
-    Treatment,
-    Unit,
-    Value,
-    Version
-)
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
-from cp_request.design import (
-    DesignBlock,
-    BlockReference,
-    GenerateBlock,
-    ProductBlock,
-    ReplicateBlock,
-    SumBlock,
-    SubjectReference,
-    TreatmentReference,
-    TreatmentValueReference
-)
+if TYPE_CHECKING:
+    from cp_request import (
+        Measurement,
+        NamedEntity,
+        Sample,
+        Treatment,
+        Unit,
+        Value,
+        Version
+    )
+
+    from cp_request.design import (
+        DesignBlock,
+        BlockReference,
+        GenerateBlock,
+        ProductBlock,
+        ReplicateBlock,
+        SumBlock,
+        SubjectReference,
+        TreatmentReference,
+        TreatmentValueReference
+    )
 
 from transform import RequestTransformer
 

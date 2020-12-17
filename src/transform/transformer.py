@@ -1,28 +1,28 @@
+from __future__ import annotations
 import abc
+from typing import TYPE_CHECKING
 
-from cp_request import (
-    Attribute,
-    Control,
-    ExperimentalRequest,
-    Measurement,
-    NamedEntity,
-    Sample,
-    Treatment,
-    Unit,
-    Value,
-    Version
-)
-from cp_request.design import (
-    DesignBlock,
-    BlockReference,
-    GenerateBlock,
-    ProductBlock,
-    ReplicateBlock,
-    SumBlock,
-    SubjectReference,
-    TreatmentReference,
-    TreatmentValueReference
-)
+if TYPE_CHECKING:
+    from cp_request.attribute import Attribute
+    from cp_request.measurement import Control, Measurement, Sample
+    from cp_request.named_entity import NamedEntity
+    from cp_request.treatment import Treatment
+    from cp_request.unit import Unit
+    from cp_request.value import Value
+    from cp_request.version import Version
+    from cp_request.experimental_request import ExperimentalRequest
+
+    from cp_request.design.design_block import DesignBlock
+    from cp_request.design.block_reference import BlockReference
+    from cp_request.design.generate_block import GenerateBlock
+    from cp_request.design.product_block import ProductBlock
+    from cp_request.design.replicate_block import ReplicateBlock
+    from cp_request.design.sum_block import SumBlock
+    from cp_request.design.subject_reference import SubjectReference
+    from cp_request.design.treatment_reference import (
+        TreatmentReference,
+        TreatmentValueReference
+    )
 
 
 class RequestTransformer(abc.ABC):
