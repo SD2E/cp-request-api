@@ -1,1 +1,2 @@
-from transform import RequestTransformer
+from transform.transformer import RequestTransformer
+from transform.normalize import NormalizeTransformer
